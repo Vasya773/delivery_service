@@ -1,0 +1,75 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: delivery_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: delivery_db
+      MYSQL_USER: delivery_user
+      MYSQL_PASSWORD: delivery_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: delivery_rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  redis:
+    image: redis:latest
+    container_name: delivery_redis
+    ports:
+        - "6379:6379"
+
+  web:
+    build: .
+    container_name: delivery_web
+    command: ["bash", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_HOST=db
+      - DATABASE_NAME=delivery_db
+      - DATABASE_USER=delivery_user
+      - DATABASE_PASSWORD=delivery_password
+      - DATABASE_PORT=3306
+      - RABBITMQ_HOST=rabbitmq
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - db
+      - redis
+      - rabbitmq
+    volumes:
+      - .:/app
+
+  celery:
+    build: .
+    container_name: delivery_celery
+    command: celery -A config worker -l INFO
+    environment:
+      - DATABASE_HOST=db
+      - DATABASE_NAME=delivery_db
+      - DATABASE_USER=delivery_user
+      - DATABASE_PASSWORD=delivery_password
+      - DATABASE_PORT=3306
+      - RABBITMQ_HOST=rabbitmq
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - rabbitmq
+      - redis
+      - db
+    volumes:
+      - .:/app
+
+volumes:
+    db_data:
