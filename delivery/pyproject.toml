@@ -1,0 +1,43 @@
+[tool.poetry]
+name = "delivery-service"
+version = "0.1.0"
+description = ""
+authors = ["anakin <lord.al@icloud.com>"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.12"
+django = "^5.1.5"
+djangorestframework = "^3.15.2"
+pydantic = "^2.10.5"
+python-decouple = "^3.8"
+rabbitmq = "^0.2.0"
+flower = "^2.0.1"
+swagger-ui-py = "^23.9.23"
+drf-yasg = "^1.21.8"
+celery = "^5.4.0"
+python-dotenv = "^1.0.1"
+mysqlclient = "^2.2.7"
+pydantic-settings = "^2.7.1"
+gunicorn = "^23.0.0"
+aioamqp = "^0.15.0"
+sqlalchemy = "^2.0.37"
+drf-spectacular = "^0.28.0"
+redis = "^5.2.1"
+django-filter = "^24.3"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.4"
+pytest-django = "^4.9.0"
+black = "^24.4.2"
+isort = "^5.13.2"
+flake8 = "^7.0.0"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+python_files = "tests.py test_*.py *_tests.py"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
