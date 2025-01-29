@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.13-slim
 
 ENV PYTHONUNBUFFERED=1
 
@@ -12,7 +12,7 @@ RUN apt-get update && \
         build-essential
 
 RUN pip install --upgrade pip
-RUN pip install poetry
+RUN pip install poetry==1.8.4
 
 RUN poetry config virtualenvs.create false
 

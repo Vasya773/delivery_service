@@ -3,15 +3,24 @@ services:
     image: mysql:8.0
     container_name: delivery_db
     restart: always
+    env_file:
+      - .env
     environment:
       MYSQL_ROOT_PASSWORD: root_password
-      MYSQL_DATABASE: delivery_db
-      MYSQL_USER: delivery_user
-      MYSQL_PASSWORD: delivery_password
+      MYSQL_DATABASE: ${DATABASE_NAME}
+      MYSQL_USER: ${DATABASE_USER}
+      MYSQL_PASSWORD: ${DATABASE_PASSWORD}
     ports:
       - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "delivery_user",
+             "-p${MYSQL_PASSWORD}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -20,8 +29,8 @@ services:
       - "5672:5672"
       - "15672:15672"
     environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
 
   redis:
     image: redis:latest
@@ -32,18 +41,11 @@ services:
   web:
     build: .
     container_name: delivery_web
-    command: ["bash", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]
+    command: ["bash", "-c", "python manage.py runserver 0.0.0.0:8000"]
     ports:
       - "8000:8000"
-    environment:
-      - DATABASE_HOST=db
-      - DATABASE_NAME=delivery_db
-      - DATABASE_USER=delivery_user
-      - DATABASE_PASSWORD=delivery_password
-      - DATABASE_PORT=3306
-      - RABBITMQ_HOST=rabbitmq
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+    env_file:
+       - .env
     depends_on:
       - db
       - redis
@@ -55,15 +57,8 @@ services:
     build: .
     container_name: delivery_celery
     command: celery -A config worker -l INFO
-    environment:
-      - DATABASE_HOST=db
-      - DATABASE_NAME=delivery_db
-      - DATABASE_USER=delivery_user
-      - DATABASE_PASSWORD=delivery_password
-      - DATABASE_PORT=3306
-      - RABBITMQ_HOST=rabbitmq
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+    env_file:
+       - .env
     depends_on:
       - rabbitmq
       - redis
@@ -73,3 +68,7 @@ services:
 
 volumes:
     db_data:
+
+networks:
+  delivery_network:
+    driver: bridge
