@@ -2,12 +2,12 @@
 name = "delivery-service"
 version = "0.1.0"
 description = ""
-authors = ["anakin <lord.al@icloud.com>"]
+authors = [""]
 readme = "README.md"
 package-mode = false
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.13"
 django = "^5.1.5"
 djangorestframework = "^3.15.2"
 pydantic = "^2.10.5"
@@ -22,17 +22,14 @@ mysqlclient = "^2.2.7"
 pydantic-settings = "^2.7.1"
 gunicorn = "^23.0.0"
 aioamqp = "^0.15.0"
-sqlalchemy = "^2.0.37"
 drf-spectacular = "^0.28.0"
 redis = "^5.2.1"
 django-filter = "^24.3"
+ruff = "^0.9.3"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.4"
 pytest-django = "^4.9.0"
-black = "^24.4.2"
-isort = "^5.13.2"
-flake8 = "^7.0.0"
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "config.settings"
