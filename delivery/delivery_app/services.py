@@ -6,11 +6,12 @@ from django.core.cache import cache
 from .interfaces import (CacheInvalidatorInterface,
                          DeliveryCostCalculatorInterface,
                          SessionManagerInterface)
+from .enums import PackageTypeEnum
 
 
 class DeliveryCostCalculator(DeliveryCostCalculatorInterface):
     def calculate(
-        self, weight: Decimal, package_type_name: str, declared_value: Decimal
+            self, weight: Decimal, package_type_name: str, declared_value: Decimal
     ) -> Tuple[Decimal, str]:
         """
         Calculates the delivery cost based on weight, type, and declared value.
@@ -22,9 +23,9 @@ class DeliveryCostCalculator(DeliveryCostCalculatorInterface):
         value_factor = Decimal("0.01")
         warning = None
 
-        if package_type_name == "Electronics":
+        if package_type_name == PackageTypeEnum.ELECTRONICS:
             type_factor = Decimal("2.5")
-        elif package_type_name == "Clothes":
+        elif package_type_name == PackageTypeEnum.CLOTHES:
             type_factor = Decimal("1.5")
         else:
             warning = (
@@ -32,7 +33,7 @@ class DeliveryCostCalculator(DeliveryCostCalculatorInterface):
             )
 
         delivery_cost = (
-            base_cost + (weight * weight_factor) + (declared_value * value_factor)
+                base_cost + (weight * weight_factor) + (declared_value * value_factor)
         )
         delivery_cost *= type_factor
 
