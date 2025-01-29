@@ -47,6 +47,7 @@ class PackageTypeList(generics.ListAPIView):
         return queryset
 
 
+
 class PackageRegistration(APIView):
     """
     API endpoint to register a new package.
@@ -70,22 +71,6 @@ class PackageRegistration(APIView):
 
             package_data = serializer.validated_data
             package_data["user_session"] = user_session_key
-
-            package_registration_use_case = PackageRegistrationUseCase(
-                package_repository=PackageRepository(),
-                delivery_cost_calculator=DeliveryCostCalculator(),
-            )
-
-            package, warning = package_registration_use_case.register_package(
-                user_session=user_session_key,
-                name=package_data["name"],
-                weight=package_data["weight"],
-                package_type_name=package_data["package_type_name"],
-                declared_value=package_data["declared_value"],
-            )
-
-            if warning:
-                logger.warning(warning)
 
             register_package_task.delay(package_data)
 

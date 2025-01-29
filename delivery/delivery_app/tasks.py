@@ -1,6 +1,8 @@
 import logging
 
 from celery import shared_task
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.db import DatabaseError
 
 from .repositories import PackageRepository
 from .services import DeliveryCostCalculator
@@ -32,6 +34,16 @@ def register_package_task(self, package_data):
 
         logger.info(f"Package {package.id} registered and delivery cost calculated.")
 
+    except ObjectDoesNotExist as e:
+        logger.error(f"Package type not found: {e}")
+    except ValidationError as e:
+        logger.error(f"Data validation error: {e}")
+    except DatabaseError as e:
+        logger.error(f"Database error: {e}")
+        self.retry(exc=e)
+    except TypeError as e:
+        logger.error(f"Type error: {e}")
+        self.retry(exc=e)
     except Exception as e:
-        logger.error(f"Error registering package: {e}")
+        logger.error(f"Unexpected error: {e}")
         self.retry(exc=e)
